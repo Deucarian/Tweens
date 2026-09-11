@@ -8,6 +8,7 @@ namespace Deucarian.Tweens.Samples
     public sealed class VisibilityPlayground : MonoBehaviour
     {
         [Range(1, 1000)] public int objectCount = 100;
+        [SerializeField] private Material previewMaterial;
         private readonly List<TransformVisibilityBinding> bindings = new List<TransformVisibilityBinding>();
         private readonly HashSet<GameObject> pool = new HashSet<GameObject>();
         private GameObject stage;
@@ -30,9 +31,12 @@ namespace Deucarian.Tweens.Samples
             var light = lightRoot.AddComponent<Light>();
             light.type = LightType.Directional; light.intensity = 1.5f;
             lightRoot.transform.rotation = Quaternion.Euler(35, -30, 0);
-            Shader shader = Shader.Find("Universal Render Pipeline/Lit");
+            var pipeline = QualitySettings.renderPipeline != null
+                ? QualitySettings.renderPipeline : UnityEngine.Rendering.GraphicsSettings.defaultRenderPipeline;
+            Shader shader = pipeline == null
+                ? Shader.Find("Standard") : Shader.Find("Universal Render Pipeline/Lit");
             if (shader == null) shader = Shader.Find("Standard");
-            if (shader != null) { material = new Material(shader); material.color = new Color(0.65f, 0.4f, 0.9f); }
+            if (previewMaterial == null && shader != null) { material = new Material(shader); material.color = new Color(0.65f, 0.4f, 0.9f); }
             int columns = Mathf.CeilToInt(Mathf.Sqrt(objectCount));
             float spacing = 10f / columns;
             for (int i = 0; i < objectCount; i++)
@@ -43,7 +47,7 @@ namespace Deucarian.Tweens.Samples
                 cube.transform.localPosition = new Vector3((i % columns - (columns - 1) * 0.5f) * spacing,
                     (i / columns - (columns - 1) * 0.5f) * spacing, 0);
                 cube.transform.localScale = Vector3.one * spacing * 0.65f;
-                if (material != null) cube.GetComponent<Renderer>().sharedMaterial = material;
+                if (previewMaterial != null || material != null) cube.GetComponent<Renderer>().sharedMaterial = previewMaterial != null ? previewMaterial : material;
                 var enter = VisibilityTweenSettings.Enter;
                 var exit = VisibilityTweenSettings.Exit;
                 if (i % 2 != 0) { enter.style = exit.style = VisibilityTweenStyle.Slide; enter.hiddenOffset = exit.hiddenOffset = Vector3.down * spacing; }

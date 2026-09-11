@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased]
+
+- Include the previously documented VisibilityPlayground scene, ready to open and play.
+- Choose a shader appropriate to the active built-in/URP renderer and allow an Inspector-assigned preview material without taking ownership of it.
+
 ## [0.2.0] - 2026-09-11
 
 - Keep preview loops running while profile/override values change and during Undo/Redo.

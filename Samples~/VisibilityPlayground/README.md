@@ -15,3 +15,7 @@ hardware performance guarantee. The package's editor preview additionally
 demonstrates UI fade and combined scale/fade without editing the scene.
 
 Use the Tweens tool in Deucarian Control Center for profile previews.
+
+The built-in renderer uses Standard; URP uses its Lit shader. Assign Preview
+Material in the Inspector when testing another render pipeline. The sample only
+destroys materials it creates, never an assigned project asset.
