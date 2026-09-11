@@ -42,7 +42,8 @@ namespace Deucarian.Tweens
             TargetVisible = visible;
             settings = value.Sanitized();
             unscaled = useUnscaledTime;
-            progress.MoveTo(visible, animate && settings.style != VisibilityTweenStyle.None ? settings.seconds : 0, settings.easing);
+            progress.MoveTo(visible, animate && settings.style != VisibilityTweenStyle.None ? settings.seconds : 0,
+                settings.easing, settings.useCustomCurve ? settings.customCurve : null);
             if (!animate || settings.style == VisibilityTweenStyle.None) progress.Reset(visible);
             ulong current = revision;
             if (target.IsAlive) target.Apply(VisibilityTweenSample.Evaluate(settings, progress.Progress));
@@ -62,6 +63,22 @@ namespace Deucarian.Tweens
         }
 
         public void Cancel() { handle.Cancel(); }
+
+        /// <summary>Applies edited settings at the current normalized time without restarting playback.</summary>
+        public void RefreshSettings(VisibilityTweenSettings value, bool animate = true, bool useUnscaledTime = true)
+        {
+            if (disposed) throw new ObjectDisposedException(nameof(VisibilityTweenPlayer));
+            ulong current = ++revision;
+            bool wasAnimating = IsAnimating;
+            settings = value.Sanitized();
+            unscaled = useUnscaledTime;
+            progress.RefreshSettings(animate && settings.style != VisibilityTweenStyle.None ? settings.seconds : 0,
+                settings.easing, settings.useCustomCurve ? settings.customCurve : null);
+            if (target.IsAlive) target.Apply(VisibilityTweenSample.Evaluate(settings, progress.Progress));
+            if (current != revision || disposed || !wasAnimating || progress.IsAnimating) return;
+            StopWithoutNotification();
+            Completed?.Invoke(TargetVisible);
+        }
         public bool Advance(float scaledSeconds, float unscaledSeconds)
         {
             ulong current = revision;

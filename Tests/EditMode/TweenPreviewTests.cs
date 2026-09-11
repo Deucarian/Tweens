@@ -87,13 +87,124 @@ namespace Deucarian.Tweens.Tests
             page.Deactivate(); page.Activate(null);
             page.Root.Q<TweenPreviewElement>().Play(true);
         }
-        [Test] public void StopAlsoClearsLoopControl()
+        [UnityEngine.TestTools.UnityTest]
+        public System.Collections.IEnumerator StopAlsoClearsLoopControl()
         {
             using var preview = new TweenPreviewElement(() => VisibilityTweenSettings.Enter, () => VisibilityTweenSettings.Exit);
-            preview.Q<Toggle>().value = true;
-            preview.Play(false); preview.Stop();
-            Assert.That(preview.Q<Toggle>().value, Is.False);
-            Assert.That(preview.IsAnimating, Is.False);
+            var window = ScriptableObject.CreateInstance<PreviewTestWindow>();
+            try
+            {
+                window.Show(); window.rootVisualElement.Add(preview);
+                yield return null;
+                preview.Q<Toggle>().value = true;
+                Assert.That(preview.IsLooping, Is.True);
+                preview.Play(false); preview.Stop();
+                Assert.That(preview.Q<Toggle>().value, Is.False);
+                Assert.That(preview.IsAnimating, Is.False);
+            }
+            finally { window.Close(); }
+        }
+
+        [UnityEngine.TestTools.UnityTest]
+        public System.Collections.IEnumerator EditingLiveSettingsKeepsLoopAndPlaybackRunning()
+        {
+            var settings = VisibilityTweenSettings.Enter;
+            settings.seconds = 1;
+            using var preview = new TweenPreviewElement(() => settings, () => settings);
+            var window = ScriptableObject.CreateInstance<PreviewTestWindow>();
+            try
+            {
+                window.Show(); window.rootVisualElement.Add(preview);
+                yield return null;
+                preview.Q<Toggle>().value = true;
+                preview.Play(true);
+                settings.hiddenScale = .35f;
+                settings.seconds = 2;
+                preview.RefreshSettings();
+                Assert.That(preview.IsLooping, Is.True);
+                Assert.That(preview.Q<Toggle>().value, Is.True);
+                Assert.That(preview.IsAnimating, Is.True);
+                Assert.That(preview.Q<VisualElement>("tween-preview-object").style.scale.value.value.x,
+                    Is.EqualTo(.35f).Within(.001f));
+            }
+            finally { window.Close(); }
+        }
+
+        [UnityEngine.TestTools.UnityTest]
+        public System.Collections.IEnumerator SwitchingProfileInsideWorkspaceKeepsLoopRunning()
+        {
+            var profile = ScriptableObject.CreateInstance<TweenVisibilityProfile>();
+            Assert.That(Deucarian.Editor.DeucarianToolRegistry.TryGet(TweenPreviewWindow.ToolId, out var tool), Is.True);
+            using var page = tool.CreatePage();
+            var window = ScriptableObject.CreateInstance<PreviewTestWindow>();
+            try
+            {
+                window.Show(); window.rootVisualElement.Add(page.Root);
+                yield return null;
+                var preview = page.Root.Q<TweenPreviewElement>();
+                preview.Q<Toggle>().value = true;
+                preview.Play(true);
+                page.Root.Q<UnityEditor.UIElements.ObjectField>("tween-profile").value = profile;
+                Assert.That(preview.IsLooping, Is.True);
+                Assert.That(preview.IsAnimating, Is.True);
+            }
+            finally { window.Close(); Object.DestroyImmediate(profile); }
+        }
+
+        [UnityEngine.TestTools.UnityTest]
+        public System.Collections.IEnumerator ProfileInspectorChangesAndUndoRedoDoNotClearLoop()
+        {
+            var profile = ScriptableObject.CreateInstance<TweenVisibilityProfile>();
+            var editor = UnityEditor.Editor.CreateEditor(profile);
+            var window = ScriptableObject.CreateInstance<PreviewTestWindow>();
+            try
+            {
+                var root = editor.CreateInspectorGUI();
+                window.Show();
+                window.rootVisualElement.Add(root);
+                yield return null;
+                var preview = root.Q<TweenPreviewElement>();
+                preview.Q<Toggle>().value = true;
+                preview.Play(true);
+                Undo.IncrementCurrentGroup();
+                root.Q<FloatField>("enter.seconds").value = .72f;
+                Undo.FlushUndoRecordObjects();
+                Assert.That(profile.enter.seconds, Is.EqualTo(.72f));
+                Assert.That(preview.IsLooping, Is.True);
+                Assert.That(preview.IsAnimating, Is.True);
+                Undo.PerformUndo();
+                Assert.That(preview.IsLooping, Is.True);
+                Assert.That(preview.IsAnimating, Is.True);
+                Undo.PerformRedo();
+                Assert.That(preview.IsLooping, Is.True);
+                Assert.That(preview.IsAnimating, Is.True);
+            }
+            finally { window.Close(); Object.DestroyImmediate(editor); Object.DestroyImmediate(profile); }
+        }
+
+        [UnityEngine.TestTools.UnityTest]
+        public System.Collections.IEnumerator CustomCurveEditorCreatesAndPreservesAuthoredCurve()
+        {
+            var profile = ScriptableObject.CreateInstance<TweenVisibilityProfile>();
+            var editor = UnityEditor.Editor.CreateEditor(profile);
+            var window = ScriptableObject.CreateInstance<PreviewTestWindow>();
+            try
+            {
+                var root = editor.CreateInspectorGUI();
+                window.Show(); window.rootVisualElement.Add(root);
+                yield return null;
+                var toggle = root.Q<Toggle>("enter.useCustomCurve");
+                var curve = root.Q<UnityEditor.UIElements.CurveField>("enter.customCurve");
+                toggle.value = true;
+                Assert.That(profile.enter.useCustomCurve, Is.True);
+                Assert.That(profile.enter.customCurve.length, Is.EqualTo(2));
+                curve.value = AnimationCurve.Linear(0, 0, 1, .5f);
+                toggle.value = false;
+                Assert.That(profile.enter.customCurve.Evaluate(.5f), Is.EqualTo(.25f).Within(.001f));
+                toggle.value = true;
+                Assert.That(profile.enter.customCurve.Evaluate(.5f), Is.EqualTo(.25f).Within(.001f));
+            }
+            finally { window.Close(); Object.DestroyImmediate(editor); Object.DestroyImmediate(profile); }
         }
         [Test] public void NoAnimationExitShowsHiddenInsteadOfStuckExiting()
         {

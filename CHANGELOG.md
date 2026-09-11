@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.0] - 2026-09-11
+
+- Keep preview loops running while profile/override values change and during Undo/Redo.
+- Refresh active playback at its existing normalized time, using the latest shape, easing, timing and reduced-motion values.
+- Add optional custom AnimationCurve authoring for profile and per-object timing, with safe invalid/empty fallback and exact endpoints.
+- Reuse Common 0.3.0's 32 serialized-compatible easing presets and shared Editor 1.11.0 controls.
+- Cover live retiming, curve ownership/overshoot/fallback, allocation-free refresh and editor loop persistence.
+
 ## [0.1.0] - 2026-09-10
 
 - Introduce active-only, generation-safe tween scheduling with sanitized diagnostics.

@@ -34,7 +34,7 @@ namespace Deucarian.Tweens.Editor
             timing.NumberWithSlider(path + ".seconds", "Duration (s)", 0, 1,
                 () => Property(path + ".seconds").floatValue,
                 value => Write(path + ".seconds", p => p.floatValue = Nonnegative(value)));
-            Choice(timing, path + ".easing", "Easing");
+            Easing(timing, path);
             if (!overrides) return;
             visibility.Add(() => DeucarianEditorWorkspaceControls.Show(timingRoot, Property(path + ".overrideTiming").boolValue));
             if (resolved != null)
@@ -57,6 +57,31 @@ namespace Deucarian.Tweens.Editor
             Number(shape, path + ".hiddenScale", "Hidden scale");
             shape.Vector(path + ".hiddenOffset", "Slide offset", () => Property(path + ".hiddenOffset").vector3Value,
                 value => Write(path + ".hiddenOffset", p => p.vector3Value = value));
+        }
+
+        private void Easing(DeucarianEditorWorkspaceForm form, string path)
+        {
+            var easing = form.Choice(path + ".easing", "Easing", Property(path + ".easing").enumDisplayNames,
+                () => Property(path + ".easing").enumValueIndex,
+                value => Write(path + ".easing", p => p.enumValueIndex = value));
+            form.Toggle(path + ".useCustomCurve", "Custom curve", () => Property(path + ".useCustomCurve").boolValue,
+                value => Write(path + ".useCustomCurve", p => {
+                    p.boolValue = value;
+                    var curve = Property(path + ".customCurve");
+                    if (value && (curve.animationCurveValue == null || curve.animationCurveValue.length < 2))
+                        curve.animationCurveValue = AnimationCurve.Linear(0, 0, 1, 1);
+                }));
+            var field = new UnityEditor.UIElements.CurveField { name = path + ".customCurve",
+                tooltip = "Normalized time (0–1) to progress. Endpoints settle at 0 and 1; overshoot is allowed." };
+            var row = DeucarianEditorWorkspaceControls.Field("Curve", field);
+            form.Root.Add(row);
+            field.RegisterValueChangedCallback(evt => Write(path + ".customCurve", p => p.animationCurveValue = evt.newValue));
+            visibility.Add(() => {
+                bool custom = Property(path + ".useCustomCurve").boolValue;
+                easing.SetEnabled(!custom);
+                DeucarianEditorWorkspaceControls.Show(row, custom);
+                field.SetValueWithoutNotify(Property(path + ".customCurve").animationCurveValue);
+            });
         }
 
         public void ProfileOptions()
@@ -133,6 +158,6 @@ namespace Deucarian.Tweens.Editor
 
         private static string DescribeTiming(VisibilityTweenSettings value)
             => value.seconds.ToString("0.##") +
-               " s · " + ObjectNames.NicifyVariableName(value.easing.ToString());
+               " s · " + (value.useCustomCurve ? "Custom curve" : ObjectNames.NicifyVariableName(value.easing.ToString()));
     }
 }
