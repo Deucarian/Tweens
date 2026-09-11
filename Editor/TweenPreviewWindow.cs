@@ -84,9 +84,10 @@ namespace Deucarian.Tweens.Editor
 
         private void SelectProfile(TweenVisibilityProfile value)
         {
-            Stop(); profile = value; useSnapshot = false;
+            profile = value; useSnapshot = false;
             workspace.Scope.Q<UnityEditor.UIElements.ObjectField>()?.SetValueWithoutNotify(profile);
             RebuildSettings();
+            preview.RefreshSettings();
         }
 
         private void RebuildSettings()
@@ -101,7 +102,7 @@ namespace Deucarian.Tweens.Editor
             else
             {
                 serializedProfile = new SerializedObject(profile);
-                settings = new TweenSettingsForm(formHost, serializedProfile, Stop);
+                settings = new TweenSettingsForm(formHost, serializedProfile, preview.RefreshSettings);
                 settings.Direction("enter", false); settings.Direction("exit", false);
                 settings.ProfileOptions(); settings.Refresh();
             }
@@ -118,7 +119,7 @@ namespace Deucarian.Tweens.Editor
             SelectProfile(asset);
         }
 
-        private void Refresh() { Stop(); settings?.Refresh(); }
+        private void Refresh() { settings?.Refresh(); preview?.RefreshSettings(); }
         private void Stop() => preview?.Stop();
         private void Release() { preview?.Dispose(); workspace?.Dispose(); serializedProfile?.Dispose(); serializedProfile = null; settings = null; }
         private void OnDisable() { Undo.undoRedoPerformed -= Refresh; navigation?.Dispose(); navigation = null; Release(); }

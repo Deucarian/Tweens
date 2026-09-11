@@ -13,6 +13,9 @@ namespace Deucarian.Tweens
         public VisibilityTweenStyle style;
         [Min(0)] public float seconds;
         public DeucarianEasing easing;
+        public bool useCustomCurve;
+        [Tooltip("Optional normalized easing curve. Playback borrows this curve and reads edits live; endpoints always settle exactly.")]
+        public AnimationCurve customCurve;
         [Min(0)] public float hiddenScale;
         public Vector3 hiddenOffset;
 
@@ -43,6 +46,9 @@ namespace Deucarian.Tweens
         public bool overrideTiming;
         [Min(0)] public float seconds;
         public DeucarianEasing easing;
+        public bool useCustomCurve;
+        [Tooltip("Optional normalized easing curve used when timing is overridden. Inactive values are preserved.")]
+        public AnimationCurve customCurve;
         public bool overrideShape;
         [Min(0)] public float hiddenScale;
         public Vector3 hiddenOffset;
@@ -51,7 +57,13 @@ namespace Deucarian.Tweens
         {
             if (animation != VisibilityTweenSelection.Inherit)
                 inherited.style = (VisibilityTweenStyle)((int)animation - 1);
-            if (overrideTiming) { inherited.seconds = seconds; inherited.easing = easing; }
+            if (overrideTiming)
+            {
+                inherited.seconds = seconds;
+                inherited.easing = easing;
+                inherited.useCustomCurve = useCustomCurve;
+                inherited.customCurve = customCurve;
+            }
             if (overrideShape) { inherited.hiddenScale = hiddenScale; inherited.hiddenOffset = hiddenOffset; }
             return inherited.Sanitized();
         }

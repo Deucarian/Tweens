@@ -1,6 +1,6 @@
 {
   "name": "com.deucarian.tweens",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "displayName": "Deucarian Tweens",
   "description": "Active-only tween scheduling, shared visibility presets, explicit animated lifetimes and isolated previews.",
   "unity": "2022.3",
@@ -8,9 +8,9 @@
   "author": { "name": "Deucarian" },
   "repository": { "type": "git", "url": "git+https://github.com/Deucarian/Tweens.git" },
   "dependencies": {
-    "com.deucarian.common": "0.2.1",
+    "com.deucarian.common": "0.3.0",
     "com.deucarian.diagnostics": "0.2.3",
-    "com.deucarian.editor": "1.10.8",
+    "com.deucarian.editor": "1.11.0",
     "com.unity.modules.ui": "1.0.0",
     "com.unity.modules.uielements": "1.0.0",
     "com.unity.modules.imgui": "1.0.0",

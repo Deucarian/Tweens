@@ -8,5 +8,5 @@ jobs:
     uses: Deucarian/Package-Registry/.github/workflows/deucarian-package-validation.yml@develop
     with:
       package-config: deucarian-package.json
-      # Development-only publication; move back to develop after catalog promotion.
-      registry-ref: ff7a5c596358b0244a1d0d6df6f006aeaaae16d0
+      # Development-only reviewed catalog; keep pinned until canonical catalog adoption.
+      registry-ref: da7575bd575754f0e7fedc8b72c3c358bb422ec3

@@ -28,8 +28,10 @@ namespace Deucarian.Tweens.Editor
         private double previousTime;
         private double nextLoopTime;
         private bool loopVisible;
+        private bool scrubbing;
         public bool IsAlive => !disposed;
         public bool IsAnimating => player.IsAnimating;
+        public bool IsLooping => loop;
 
         public TweenPreviewElement(Func<VisibilityTweenSettings> enter, Func<VisibilityTweenSettings> exit, float unitsToPixels = 100,
             Func<bool> reducedMotion = null, Func<bool> unscaledTime = null)
@@ -76,6 +78,7 @@ namespace Deucarian.Tweens.Editor
         {
             if (disposed) return;
             entering = visible;
+            scrubbing = false;
             var settings = visible ? enter() : exit();
             if (!player.IsAnimating) player.Snap(!visible, settings);
             status.text = visible ? "Entering…" : "Exiting…";
@@ -97,11 +100,26 @@ namespace Deucarian.Tweens.Editor
         {
             if (disposed) return;
             Stop();
+            scrubbing = true;
             float value = Mathf.Clamp01(visibility);
             scrub.SetValueWithoutNotify(value);
             percentage.text = value.ToString("P0");
             Apply(VisibilityTweenSample.Evaluate(entering ? enter() : exit(), value));
             status.text = entering ? "Enter · paused preview" : "Exit · paused preview";
+        }
+
+        public void RefreshSettings()
+        {
+            if (disposed) return;
+            var settings = entering ? enter() : exit();
+            if (player.IsAnimating)
+                player.RefreshSettings(settings, !(reducedMotion?.Invoke() ?? false), unscaledTime?.Invoke() ?? true);
+            else
+            {
+                Apply(VisibilityTweenSample.Evaluate(settings, scrubbing ? scrub.value : player.Progress));
+                if (!scrubbing && !player.TargetVisible) preview.style.opacity = 0;
+            }
+            if (loop) Listen();
         }
 
         public void Apply(VisibilityTweenSample sample)
@@ -114,6 +132,8 @@ namespace Deucarian.Tweens.Editor
         private void OnCompleted(bool visible)
         {
             if (!visible) preview.style.opacity = 0;
+            scrub.SetValueWithoutNotify(Mathf.Clamp01(player.Progress));
+            percentage.text = Mathf.Clamp01(player.Progress).ToString("P0");
             loopVisible = !visible;
             nextLoopTime = EditorApplication.timeSinceStartup + 0.45;
             status.text = visible ? "Visible." : "Hidden.";
@@ -138,6 +158,7 @@ namespace Deucarian.Tweens.Editor
             double now = EditorApplication.timeSinceStartup;
             float delta = (float)Math.Max(0, now - previousTime);
             previousTime = now;
+            RefreshSettings();
             scheduler.Advance(delta, delta);
             scrub.SetValueWithoutNotify(Mathf.Clamp01(player.Progress));
             percentage.text = Mathf.Clamp01(player.Progress).ToString("P0");

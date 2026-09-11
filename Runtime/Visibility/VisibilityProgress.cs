@@ -16,6 +16,7 @@ namespace Deucarian.Tweens
         private float elapsed;
         private float duration;
         private DeucarianEasing easing;
+        private AnimationCurve customCurve;
 
         public VisibilityProgress(bool clampProgress = true) { clamp = clampProgress; Reset(false); }
         public event Action<VisibilityProgress> Completed;
@@ -25,6 +26,9 @@ namespace Deucarian.Tweens
         public float RemainingSeconds => IsAnimating ? Mathf.Max(0, duration - elapsed) : 0;
 
         public float MoveTo(bool visible, float seconds, DeucarianEasing curve)
+            => MoveTo(visible, seconds, curve, null);
+
+        public float MoveTo(bool visible, float seconds, DeucarianEasing curve, AnimationCurve custom)
         {
             if (float.IsNaN(seconds) || float.IsInfinity(seconds))
                 throw new ArgumentOutOfRangeException(nameof(seconds));
@@ -32,12 +36,25 @@ namespace Deucarian.Tweens
             target = visible ? 1 : 0;
             elapsed = 0;
             easing = curve;
+            customCurve = custom;
             float distance = Mathf.Abs(target - start);
             duration = Mathf.Max(0, seconds) * distance;
             if (distance <= Epsilon) { Settle(target, false); return 0; }
             Phase = visible ? VisibilityPhase.Entering : VisibilityPhase.Exiting;
             if (duration <= Epsilon) { Settle(target, true); return 0; }
             return duration;
+        }
+
+        internal void RefreshSettings(float seconds, DeucarianEasing curve, AnimationCurve custom)
+        {
+            if (!IsAnimating) return;
+            float normalizedTime = duration <= Epsilon ? 1 : Mathf.Clamp01(elapsed / duration);
+            duration = Mathf.Max(0, seconds) * Mathf.Abs(target - start);
+            elapsed = normalizedTime * duration;
+            easing = curve;
+            customCurve = custom;
+            if (duration <= Epsilon) Settle(target, true);
+            else Sample(normalizedTime);
         }
 
         public bool Advance(float seconds)
@@ -47,10 +64,21 @@ namespace Deucarian.Tweens
             if (!IsAnimating) return false;
             elapsed += Mathf.Max(0, seconds);
             float t = Mathf.Clamp01(elapsed / duration);
-            Progress = Mathf.LerpUnclamped(start, target, DeucarianEasingUtility.Evaluate(easing, t));
-            if (clamp) Progress = Mathf.Clamp01(Progress);
+            Sample(t);
             if (t >= 1) Settle(target, true);
             return true;
+        }
+
+        private void Sample(float t)
+        {
+            float eased = DeucarianEasingUtility.Evaluate(easing, t);
+            if (customCurve != null && customCurve.length >= 2 && t > 0 && t < 1)
+            {
+                float custom = customCurve.Evaluate(t);
+                if (!float.IsNaN(custom) && !float.IsInfinity(custom)) eased = custom;
+            }
+            Progress = Mathf.LerpUnclamped(start, target, eased);
+            if (clamp) Progress = Mathf.Clamp01(Progress);
         }
 
         public void Complete() { if (IsAnimating) Settle(target, true); }

@@ -32,7 +32,7 @@ namespace Deucarian.Tweens.Editor
             var preview = new TweenPreviewElement(() => value.enter, () => value.exit, reducedMotion: () => value.reducedMotion,
                 unscaledTime: () => value.unscaledTime);
             var fields = new VisualElement(); root.Add(fields);
-            var settings = new TweenSettingsForm(fields, source, preview.Stop);
+            var settings = new TweenSettingsForm(fields, source, preview.RefreshSettings);
             settings.Direction("enter", false); settings.Direction("exit", false); settings.ProfileOptions();
             return new TweenInspectorView(root, settings, preview);
         }
@@ -44,7 +44,7 @@ namespace Deucarian.Tweens.Editor
                 reducedMotion: () => TweenVisibilityDefaults.ReducedMotion || (Profile(value)?.reducedMotion ?? false),
                 unscaledTime: () => Profile(value)?.unscaledTime ?? true);
             var fields = new VisualElement(); root.Add(fields);
-            var settings = new TweenSettingsForm(fields, source, preview.Stop);
+            var settings = new TweenSettingsForm(fields, source, preview.RefreshSettings);
             settings.Asset(settings.Form, "visualRoot", "Visual root", typeof(Transform), true);
             settings.Asset(settings.Form, "profile", "Profile", typeof(TweenVisibilityProfile));
             var sourceRow = DeucarianEditorFeatureSection.Information(Source(value));
@@ -89,7 +89,7 @@ namespace Deucarian.Tweens.Editor
         }
 
         private void Refresh() { settings.Refresh(); refreshSource?.Invoke(); }
-        private void OnUndo() { preview.Stop(); Refresh(); }
+        private void OnUndo() { Refresh(); preview.RefreshSettings(); }
         public void Dispose() { Undo.undoRedoPerformed -= OnUndo; refresh.Pause(); preview.Dispose(); }
     }
 }
