@@ -1,0 +1,35 @@
+{
+  "packageId": "com.deucarian.tweens",
+  "displayName": "Deucarian Tweens",
+  "samplePolicy": "playable-scene",
+  "operationalPackage": true,
+  "ownedCapabilities": [
+    "visibility-tween-playback"
+  ],
+  "runtimeAssemblies": [
+    "Deucarian.Tweens"
+  ],
+  "editorAssemblies": [
+    "Deucarian.Tweens.Editor"
+  ],
+  "sampleAssemblies": [
+    "Deucarian.Tweens.Samples"
+  ],
+  "testAssemblies": [
+    "Deucarian.Tweens.Tests",
+    "Deucarian.Tweens.Tests.PlayMode"
+  ],
+  "requiredDependencies": [
+    "com.deucarian.common",
+    "com.deucarian.diagnostics",
+    "com.deucarian.editor",
+    "com.unity.modules.ui",
+    "com.unity.modules.uielements",
+    "com.unity.modules.imgui",
+    "com.unity.modules.physics"
+  ],
+  "optionalVersionDefinedDependencies": [],
+  "allowedDirectDebugCalls": [],
+  "allowedDirectUnityObjectLifetimeCalls": [],
+  "expectedSamplesRoot": "Samples~/VisibilityPlayground"
+}

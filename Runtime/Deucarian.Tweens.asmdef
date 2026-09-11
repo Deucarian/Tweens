@@ -1,0 +1,6 @@
+{
+  "name": "Deucarian.Tweens",
+  "rootNamespace": "Deucarian.Tweens",
+  "references": ["Deucarian.Common", "Deucarian.Diagnostics"],
+  "autoReferenced": true
+}

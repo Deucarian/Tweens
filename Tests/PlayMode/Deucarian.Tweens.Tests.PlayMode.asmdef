@@ -1,0 +1,10 @@
+{
+  "name": "Deucarian.Tweens.Tests.PlayMode",
+  "references": [
+    "Deucarian.Tweens",
+    "Deucarian.Common"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "name": "Deucarian.Tweens.Editor",
+  "rootNamespace": "Deucarian.Tweens.Editor",
+  "references": ["Deucarian.Tweens", "Deucarian.Common", "Deucarian.Editor"],
+  "includePlatforms": ["Editor"],
+  "autoReferenced": true
+}

@@ -1,0 +1,7 @@
+{
+  "name": "Deucarian.Tweens.Samples",
+  "references": [
+    "Deucarian.Tweens",
+    "Deucarian.Common"
+  ]
+}

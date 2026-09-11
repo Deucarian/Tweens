@@ -1,0 +1,7 @@
+{
+  "name": "Deucarian.Tweens.Tests",
+  "references": ["Deucarian.Tweens", "Deucarian.Tweens.Editor", "Deucarian.Common", "Deucarian.Diagnostics", "Deucarian.Editor"],
+  "includePlatforms": ["Editor"],
+  "optionalUnityReferences": ["TestAssemblies"],
+  "autoReferenced": false
+}
