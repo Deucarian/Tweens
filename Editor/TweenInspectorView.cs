@@ -49,6 +49,7 @@ namespace Deucarian.Tweens.Editor
             var fields = new VisualElement(); root.Add(fields);
             var settings = new TweenSettingsForm(fields, source, preview.RefreshSettings);
             settings.Asset(settings.Form, "visualRoot", "Visual root", typeof(Transform), true);
+            settings.Choice(settings.Form, "scaleOrigin", "Scale origin");
             settings.Asset(settings.Form, "profile", "Profile", typeof(TweenVisibilityProfile));
             var sourceRow = DeucarianEditorFeatureSection.Information(Source(value));
             sourceRow.name = "tween-source"; fields.Add(sourceRow);

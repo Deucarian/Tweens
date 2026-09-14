@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.0 - Unreleased
+
+- Scale mesh visibility around cached renderer bounds so imported origins do not move the visible object; retain an explicit authored transform-origin option and exact cancellation/pooling restoration.
+
 ## 0.2.1 - Unreleased
 
 - Stop inspector refresh and preview work when its Unity target is destroyed.

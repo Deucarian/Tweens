@@ -12,7 +12,8 @@ namespace Deucarian.Tweens
             if (authored == null) authored = target.GetComponent<TweenedVisibility>();
             var binding = new TransformVisibilityBinding(scheduler, target,
                 authored != null ? authored.visualRoot : target.transform,
-                VisibilityTweenSettings.Enter, VisibilityTweenSettings.Exit);
+                VisibilityTweenSettings.Enter, VisibilityTweenSettings.Exit,
+                authored != null ? authored.scaleOrigin : VisibilityScaleOrigin.RendererBoundsCenter);
             Configure(binding, target, stableId, authored);
             return binding;
         }
