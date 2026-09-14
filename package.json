@@ -1,12 +1,17 @@
 {
   "name": "com.deucarian.tweens",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "displayName": "Deucarian Tweens",
   "description": "Active-only tween scheduling, shared visibility presets, explicit animated lifetimes and isolated previews.",
   "unity": "2022.3",
   "license": "MIT",
-  "author": { "name": "Deucarian" },
-  "repository": { "type": "git", "url": "git+https://github.com/Deucarian/Tweens.git" },
+  "author": {
+    "name": "Deucarian"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Deucarian/Tweens.git"
+  },
   "dependencies": {
     "com.deucarian.common": "0.3.0",
     "com.deucarian.diagnostics": "0.2.3",
@@ -17,6 +22,10 @@
     "com.unity.modules.physics": "1.0.0"
   },
   "samples": [
-    { "displayName": "Visibility Playground", "description": "Playable enter/exit, reversal and pooling examples.", "path": "Samples~/VisibilityPlayground" }
+    {
+      "displayName": "Visibility Playground",
+      "description": "Playable enter/exit, reversal and pooling examples.",
+      "path": "Samples~/VisibilityPlayground"
+    }
   ]
 }

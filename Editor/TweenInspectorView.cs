@@ -12,10 +12,13 @@ namespace Deucarian.Tweens.Editor
         private readonly TweenPreviewElement preview;
         private readonly IVisualElementScheduledItem refresh;
         private readonly Action refreshSource;
+        private readonly Func<bool> isAlive;
+        private bool disposed;
         public VisualElement Root { get; }
 
-        private TweenInspectorView(VisualElement root, TweenSettingsForm settings, TweenPreviewElement preview, Action refreshSource = null)
+        private TweenInspectorView(VisualElement root, TweenSettingsForm settings, TweenPreviewElement preview, Action refreshSource = null, Func<bool> isAlive = null)
         {
+            this.isAlive = isAlive;
             Root = root; this.settings = settings; this.preview = preview; this.refreshSource = refreshSource;
             var section = new DeucarianEditorWorkspaceForm(root).Section("Preview");
             section.Note(() => "Resolved object settings");
@@ -34,7 +37,7 @@ namespace Deucarian.Tweens.Editor
             var fields = new VisualElement(); root.Add(fields);
             var settings = new TweenSettingsForm(fields, source, preview.RefreshSettings);
             settings.Direction("enter", false); settings.Direction("exit", false); settings.ProfileOptions();
-            return new TweenInspectorView(root, settings, preview);
+            return new TweenInspectorView(root, settings, preview, isAlive: () => value != null);
         }
 
         public static TweenInspectorView ForObject(SerializedObject source, TweenedVisibility value)
@@ -62,17 +65,19 @@ namespace Deucarian.Tweens.Editor
             advanced.Note(() => "Fade requires a CanvasGroup or a consumer renderer adapter.");
             return new TweenInspectorView(root, settings, preview, () => {
                 sourceRow.Q<Label>().text = Source(value); open.SetEnabled(Profile(value) != null);
-            });
+            }, () => value != null);
         }
 
         private static TweenVisibilityProfile Profile(TweenedVisibility value)
         {
+            if (value == null) return null;
             TweenVisibilityBindings.Resolve(value.gameObject, value.stableId, value, out _, out _, out var profile);
             return profile;
         }
 
         private static VisibilityTweenSettings Resolve(TweenedVisibility value, bool entering)
         {
+            if (value == null) return entering ? VisibilityTweenSettings.Enter : VisibilityTweenSettings.Exit;
             TweenVisibilityBindings.Resolve(value.gameObject, value.stableId, value, out var enter, out var exit, out _);
             return entering ? enter : exit;
         }
@@ -88,8 +93,18 @@ namespace Deucarian.Tweens.Editor
             return result;
         }
 
-        private void Refresh() { settings.Refresh(); refreshSource?.Invoke(); }
-        private void OnUndo() { Refresh(); preview.RefreshSettings(); }
-        public void Dispose() { Undo.undoRedoPerformed -= OnUndo; refresh.Pause(); preview.Dispose(); }
+        private void Refresh()
+        {
+            if (disposed) return;
+            if (isAlive != null && !isAlive()) { Dispose(); return; }
+            settings.Refresh(); refreshSource?.Invoke();
+        }
+        private void OnUndo() { Refresh(); if (!disposed) preview.RefreshSettings(); }
+        public void Dispose()
+        {
+            if (disposed) return;
+            disposed = true;
+            Undo.undoRedoPerformed -= OnUndo; refresh.Pause(); preview.Dispose();
+        }
     }
 }

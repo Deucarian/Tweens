@@ -77,6 +77,30 @@ namespace Deucarian.Tweens.Tests
 
         public sealed class PreviewTestWindow : EditorWindow { }
 
+        [UnityEngine.TestTools.UnityTest]
+        public System.Collections.IEnumerator DestroyingInspectedTargetStopsAnAttachedLoop()
+        {
+            var target = new GameObject("Inspector lifetime test");
+            var editor = UnityEditor.Editor.CreateEditor(target.AddComponent<TweenedVisibility>());
+            var window = ScriptableObject.CreateInstance<PreviewTestWindow>();
+            try
+            {
+                var root = editor.CreateInspectorGUI();
+                window.Show(); window.rootVisualElement.Add(root);
+                yield return null;
+                var preview = root.Q<TweenPreviewElement>();
+                preview.Q<Toggle>().value = true;
+                preview.Play(true);
+                Object.DestroyImmediate(target);
+                double deadline = EditorApplication.timeSinceStartup + 2;
+                while (preview.IsAlive && EditorApplication.timeSinceStartup < deadline) yield return null;
+                Assert.That(preview.IsAlive, Is.False);
+                Assert.That(preview.IsAnimating, Is.False);
+                UnityEngine.TestTools.LogAssert.NoUnexpectedReceived();
+            }
+            finally { window.Close(); Object.DestroyImmediate(editor); if (target != null) Object.DestroyImmediate(target); }
+        }
+
         [Test] public void TweensContributesAnInWindowPage()
         {
             Assert.That(Deucarian.Editor.DeucarianToolRegistry.TryGet(TweenPreviewWindow.ToolId, out var tool), Is.True);
