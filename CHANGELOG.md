@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1 - Unreleased
+
+- Stop inspector refresh and preview work when its Unity target is destroyed.
+
 ## [Unreleased]
 
 - Include the previously documented VisibilityPlayground scene, ready to open and play.
