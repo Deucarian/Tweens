@@ -9,6 +9,8 @@ namespace Deucarian.Tweens
     {
         [Tooltip("Prefer a visual child so animation does not change logical poses or physics.")]
         public Transform visualRoot;
+        [Tooltip("Scale meshes around their visible bounds, or preserve an explicitly authored transform pivot.")]
+        public VisibilityScaleOrigin scaleOrigin = VisibilityScaleOrigin.RendererBoundsCenter;
         public TweenVisibilityProfile profile;
         public VisibilityTweenOverride enter;
         public VisibilityTweenOverride exit;

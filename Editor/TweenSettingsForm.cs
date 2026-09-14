@@ -124,7 +124,7 @@ namespace Deucarian.Tweens.Editor
             foreach (var update in visibility) update();
         }
 
-        private void Choice(DeucarianEditorWorkspaceForm form, string path, string label)
+        public void Choice(DeucarianEditorWorkspaceForm form, string path, string label)
             => form.Choice(path, label, Property(path).enumDisplayNames,
                 () => Property(path).enumValueIndex, value => Write(path, p => p.enumValueIndex = value));
 
