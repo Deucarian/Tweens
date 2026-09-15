@@ -16,6 +16,7 @@ namespace Deucarian.Tweens
         private readonly VisibilityTweenPlayer player;
         private readonly Vector3 visibleScale;
         private readonly Vector3 visiblePosition;
+        private readonly Vector3 scalePivotOffset;
         private readonly float visibleAlpha;
         private readonly bool blocksRaycasts;
         private readonly bool interactable;
@@ -41,13 +42,16 @@ namespace Deucarian.Tweens
         public event Action<bool> Completed;
 
         public TransformVisibilityBinding(TweenScheduler scheduler, GameObject root, Transform visual,
-            VisibilityTweenSettings enter, VisibilityTweenSettings exit)
+            VisibilityTweenSettings enter, VisibilityTweenSettings exit,
+            VisibilityScaleOrigin scaleOrigin = VisibilityScaleOrigin.RendererBoundsCenter)
         {
             this.root = root != null ? root : throw new ArgumentNullException(nameof(root));
             this.visual = visual != null ? visual : root.transform;
             canvas = this.visual.GetComponent<CanvasGroup>();
             visibleScale = this.visual.localScale;
             visiblePosition = this.visual.localPosition;
+            Vector3 scalePivot = TransformVisibilityPivot.Resolve(this.visual, scaleOrigin);
+            scalePivotOffset = this.visual.localRotation * Vector3.Scale(visibleScale, scalePivot);
             visibleAlpha = canvas != null ? canvas.alpha : 1;
             blocksRaycasts = canvas != null && canvas.blocksRaycasts;
             interactable = canvas != null && canvas.interactable;
@@ -136,8 +140,9 @@ namespace Deucarian.Tweens
             // The visual's authored pose is owned by this binding for its lifetime.
             if (appliedScale != sample.Scale)
             { visual.localScale = visibleScale * sample.Scale; appliedScale = sample.Scale; }
-            if (appliedOffset != sample.Offset)
-            { visual.localPosition = visiblePosition + sample.Offset; appliedOffset = sample.Offset; }
+            Vector3 offset = sample.Offset + scalePivotOffset * (1 - sample.Scale);
+            if (appliedOffset != offset)
+            { visual.localPosition = visiblePosition + offset; appliedOffset = offset; }
             if (canvas != null && appliedAlpha != sample.Alpha)
             { canvas.alpha = visibleAlpha * sample.Alpha; appliedAlpha = sample.Alpha; }
         }
