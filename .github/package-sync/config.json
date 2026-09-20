@@ -6,7 +6,7 @@
   },
   "validationWorkflow": "package-validation.yml",
   "requiredChecks": [
-    "Shared package validation / Validate package"
+    "validate / Validate package"
   ],
   "mergeAfterValidation": true,
   "channels": [
